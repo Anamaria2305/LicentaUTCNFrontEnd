@@ -2,6 +2,10 @@
   text-align: center;
 }
 
+body {
+  background-color: floralwhite;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -14,14 +18,13 @@
 }
 
 .App-header {
-  background-color: #282c34;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: black;
 }
 
 .App-link {
@@ -35,4 +38,55 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.init {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.init form {
+  display: grid;
+}
+
+.form-input {
+  width: 500px;
+  min-height: 35px;
+  max-height: 100px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  border: 1px solid darkseagreen;
+}
+
+.form-select {
+  width: 500px;
+  min-height: 35px;
+  max-height: 100px;
+}
+
+.form-button {
+  width: 100px;
+  min-height: 35px;
+  max-height: 100px;
+  color: black;
+  font-size: large;
+  background-color: #a4cfbb;
+  border-radius: 5px;
+  border-style: hidden;
+}
+.form-button:hover {
+  background-color: darkseagreen;
+}
+.form-button:active {
+  background-color: mediumseagreen;
+}
+
+.form-button:disabled {
+  background-color: darkgray;
+}
+
+.single {
+  background-color: cadetblue;
+  height: 100%;
 }

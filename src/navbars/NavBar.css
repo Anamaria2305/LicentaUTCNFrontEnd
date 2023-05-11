@@ -1,0 +1,56 @@
+.navbar-header, .navbar, .navbar-default {
+    background-color: #a4cfbb;
+}
+
+.max-width {
+    width: 100%;
+}
+
+.navbar-title {
+    width: 100%;
+    margin-left: 350px;
+    font-weight: bolder
+}
+
+.navbar-home {
+    float: left
+}
+
+.navbar-flask {
+    float: right;
+    display: flex
+}
+
+.navbar-buttons {
+    float: right;
+    display: flex;
+    margin-top: 10px
+}
+
+.navbar-logout{
+    background-color: #a4cfbb;
+    border-style: hidden;
+}
+
+.navbar-button {
+    margin-left: 50px
+}
+
+.chat-navbar {
+    background-color: white;
+    font-weight: normal;
+    width: 100%;
+    position: center;
+}
+
+.chat-navbar-text {
+    font-weight: normal;
+    width: 100%;
+    margin-left: 490px;
+}
+
+.chat-user-img {
+    float: left;
+    max-width: 60px;
+    border-radius: 20%;
+}

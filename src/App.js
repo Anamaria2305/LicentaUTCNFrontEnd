@@ -1,25 +1,22 @@
-import logo from './logo.svg';
+import logo from './res/images/energy-icon.webp';
 import './App.css';
+import {NavLink} from 'react-router-dom';
+import {APP_NAME} from './res/STRINGS';
+import AdminNav from "./navbars/AdminNav";
+import React from "react";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  return <div className="App">
+    <header className="App-header">
+      <img src={logo} className="App-logo" alt="logo"/>
+      <br/>
+      <h1>{APP_NAME}</h1>
+      <br/>
+      <NavLink to={"/login"}><button className="form-button"> LogIn </button></NavLink>
+      <br/>
+      <NavLink to={"/signup"}><button className="form-button"> SignUp </button></NavLink>
+    </header>
+  </div>;
 }
 
 export default App;

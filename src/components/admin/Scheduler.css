@@ -1,0 +1,30 @@
+.scheduler-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: normal;
+    align-items: center;
+    height: 100vh;
+}
+
+.scheduler-dropdown {
+    width: 200px;
+    height: 40px;
+    padding: 8px;
+    margin-top: 50px;
+    margin-left: 70px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    outline: none;
+    appearance: none;
+}
+
+.scheduler-dropdown option {
+    font-size: 16px;
+    padding: 8px;
+    background-color: #fff;
+    color: #000;
+}
+
