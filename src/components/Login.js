@@ -1,26 +1,27 @@
 import React, { useState } from "react";
 import axios from "axios";
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
-
+import { Button, Form } from "react-bootstrap";
+import { Card, Classes } from "@blueprintjs/core";
+import "../css/Login.css";
 const Login = () => {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
 
     const navigate = useNavigate();
 
     const showToastMessage = () =>
         toast.error('Incorrect credentials !', {
-            position: toast.POSITION.TOP_RIGHT
+            position: toast.POSITION.TOP_CENTER
         });
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
+    async function handleLogin(event) {
+        event.preventDefault();
+        var { uname, pass } = document.forms[0];
         try {
             const response = await axios.post(
                 "http://localhost:8000/api/login",
-                { username, password }
+                { uname, pass }
             );
             console.log(response.data)
             localStorage.setItem("token", response.data.token);
@@ -31,34 +32,35 @@ const Login = () => {
             console.log(error);
             showToastMessage();
         }
-    };
+
+    }
 
     return (
-        <div>
-            <ToastContainer />
-        <form onSubmit={handleLogin}>
-            <div>
-                <label htmlFor="username">Username:</label>
-                <input
-                    type="username"
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                />
+        <div className="loginpage">
+            <div className="loginform">
+                <ToastContainer />
+                <Card className={Classes.ELEVATION_3}>
+                    <Form onSubmit={handleLogin}>
+                        <fieldset className="fieldset-bordered">
+                            <Form.Label>
+                                <legend>LogIn Form</legend>
+                            </Form.Label>
+                            <Form.Group>
+                                <Form.Label>Username :</Form.Label>
+                                <Form.Control type="text" required name="uname"
+                                    placeholder="Username/e-mail" />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Password:</Form.Label>
+                                <Form.Control type="password" required name="pass" placeholder="Password" />
+                            </Form.Group>
+                            <Button className="but" variant="danger" type="submit" style={{ margin: "20px" }}>
+                                Log In
+                            </Button>
+                        </fieldset>
+                    </Form>
+                </Card>
             </div>
-            <div>
-                <label htmlFor="password">Password:</label>
-                <input
-                    type="password"
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-            </div>
-            <button type="submit">Login</button>
-        </form>
         </div>
     );
 };

@@ -1,0 +1,19 @@
+.loginpage {
+    overflow: auto;
+    min-height: 100vh !important;
+    background-repeat: repeat-y;
+}
+
+.loginform {
+    top: 20%;
+    left: 26%;
+    position: absolute;
+    width: 700px;
+    height: auto;
+    text-align: center;
+}
+
+.fieldset-bordered {
+    border: 1px solid #6c757d;
+    padding: .5rem;
+}
