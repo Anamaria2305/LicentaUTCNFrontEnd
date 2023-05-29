@@ -3,7 +3,7 @@
     flex-direction: column;
     justify-content: normal;
     align-items: center;
-    height: 100vh;
+    maxWidth: 800px;
 }
 
 .scheduler-dropdown {

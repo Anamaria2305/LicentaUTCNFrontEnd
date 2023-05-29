@@ -7,6 +7,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import Login from './components/Login';
+import Signup from './components/Signup';
 import Experiment from './components/admin/Experiment';
 import Scheduler from './components/admin/Scheduler';
 import Car from './components/client/Car';
@@ -26,19 +27,7 @@ root.render(
             <Route path='/car' element={<Car/>}/>
             <Route path='/profile' element={<Profile/>}/>
             <Route path='/notifications' element={<Notifications/>}/>
-            {/*<Route path='/provider' element={<ProviderView/>}/>*/}
-            {/*<Route path='/problemDetails' element={<ProblemDetails/>}/>*/}
-            {/*<Route path='/providerDetails' element={<ProviderDetails/>}/>*/}
-            {/*<Route path='/chats' element={<ChatsView/>}/>*/}
-            {/*<Route path='/chat' element={<ChatView/>}/>*/}
-            {/*<Route path='/providerProfiles' element={<ProviderProfilesView/>}/>*/}
-            {/*<Route path='/providerProfile' element={<ProviderProfile/>}/>*/}
-            {/*<Route path='/beneficiaryProfile' element={<Profile/>}/>*/}
-            {/*<Route path='/makeAnOffer' element={<MakeAnOffer/>}/>*/}
-            {/*<Route path='/postProblem' element={<PostProblemView/>}/>*/}
-            {/*<Route path='/beneficiary' element={<BeneficiaryHome/>}/>*/}
-            {/*<Route path='/offers' element={<Offers/>}/>*/}
-            {/*<Route path='/favourites' element={<Favourites/>}/>*/}
+            <Route path='/signup' element={<Signup/>}/>
         </Routes>
     </BrowserRouter>
 );
