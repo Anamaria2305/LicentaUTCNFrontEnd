@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
+import { Button} from "react-bootstrap";
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from "@mui/material/FormLabel";
 import { GoogleMap, Marker, LoadScript, InfoWindow } from "@react-google-maps/api";
@@ -111,7 +112,10 @@ function DQN() {
                 <FormControlLabel value="charge" control={<Radio />} label="Charge" />
                 <FormControlLabel value="discharge" control={<Radio />} label="Discharge" />
             </RadioGroup>
-            <button onClick={makePrediction}>Make Prediction</button>
+            <Button variant='info'
+            onClick={makePrediction}>
+            Make scheduling
+            </Button>
             <div>
                 <Bar
                     data={{
@@ -134,7 +138,9 @@ function DQN() {
                     type={Bar}
                 />
             </div>
-            <button type="submit">Finalize</button>
+            <Button type='submit' variant='info' style={{margin:"10px"}}>
+            Make scheduling
+            </Button>
 
             <LoadScript googleMapsApiKey="AIzaSyALD8glYng1LfMqO-tQLhUpVcCQOc6sSfU">
                 <GoogleMap

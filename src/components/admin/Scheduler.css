@@ -1,9 +1,10 @@
 .scheduler-container {
     display: flex;
     flex-direction: column;
-    justify-content: normal;
+    justify-content: center;
     align-items: center;
-    maxWidth: 800px;
+    margin: auto;
+    max-width: 800px;
 }
 
 .scheduler-dropdown {

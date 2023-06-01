@@ -2,44 +2,45 @@ import AdminNav from "../../navbars/AdminNav";
 import React, { useState } from "react";
 import './Scheduler.css';
 import DQN from "./DQN";
-
+import { Button} from "react-bootstrap";
 import styled from 'styled-components';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 
-const Button = styled.button`
-`;
-
-const ButtonToggle = styled(Button)`
-  opacity: 0.6;
-  ${({ active }) =>
-    active &&
-    `
-    opacity: 1;
-  `}
-`;
-
 
 const Scheduler = () => {
-    const types = ['DQN', 'Whale'];
 
-    const [active, setActive] = useState('');
+  const [button1Disabled, setButton1Disabled] = useState(false);
+  const [button2Disabled, setButton2Disabled] = useState(false);
+  const [isFirstClick, setFirstClick] = useState(false);
+
+  const handleButton1Click = () => {
+    setButton1Disabled(true);
+    setButton2Disabled(false);
+    setFirstClick(true)
+  };
+
+  const handleButton2Click = () => {
+    setButton1Disabled(false);
+    setButton2Disabled(true);
+    setFirstClick(true)
+  };
 
     return (
+        <div>
+        <AdminNav/>
+        <div style={{display:"flex",gap:"100px", justifyContent: 'center', alignItems: 'center'}}>   
+            <Button variant='info' disabled={button1Disabled} style={{margin:'20px'}}
+        onClick={handleButton1Click}>
+            Deep Q-Network
+            </Button>
+            <Button variant='primary' disabled={button2Disabled} style={{margin:'20px'}}
+        onClick={handleButton2Click}>
+            Whale Optimization
+            </Button>
+            </div>
         <div className="scheduler-container">
-            <AdminNav/>
-            <ButtonGroup style={{ gap: '30px' }}>
-                {types.map(type => (
-                    <ButtonToggle
-                        key={type}
-                        active={active === type}
-                        onClick={() => setActive(type)}
-                    >
-                        {type}
-                    </ButtonToggle>
-                ))}
-            </ButtonGroup>
-
-            {active === 'DQN' && (<DQN/>)}
+            {(isFirstClick && button1Disabled) === true && (<DQN/>)}
+        </div>
         </div>
     );
 };

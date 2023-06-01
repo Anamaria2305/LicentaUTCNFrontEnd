@@ -2,7 +2,10 @@ import ClientNav from "../../navbars/ClientNav";
 import React, { useState, useEffect } from 'react';
 import {toast, ToastContainer} from "react-toastify";
 import axios from "axios";
-
+import { Button, Form } from "react-bootstrap";
+import { Card, Classes } from "@blueprintjs/core";
+import "../../css/Login.css";
+import PreferenceOrder from "./PreferenceOrder";
 const Car = () => {
 
     const [identification, setIdentification] = useState('');
@@ -10,25 +13,58 @@ const Car = () => {
     const [model, setModel] = useState('');
     const [battery_capacity, setBatteryCapacity] = useState('');
     const [isNew, setIsNew] = useState(true);
-
+    const [charginStationArray, setcharginStationArray] = useState([{id:"1",name:"nume"},{id:"2",name:"nume2"}]);
     const username = localStorage.getItem('username')
+    const [errorMessage, setMessage] = useState("");
+    const [disbl, setDis] = useState(false);
+    const [ore,setOre] = useState([8,9,10,11,12,13])
+    const [checkedItems, setCheckedItems] = useState(new Set(ore));
+    const values = ["Favourite Chargin Station", "Time Interval"];
+
+    const [isCI, setIsCI] = useState(true);
+    const [isBrand, setIsBrand] = useState(true);
+
+    const onChangeCI = (e) => {
+        var nr = e.target.value
+        let nrREG = new RegExp("^(?:[A-Z]{1,2}\\d{2}(?:\\d{1})?[A-Z]{3})$");
+        if(!nrREG.test(nr)){
+         setIsCI(false)
+         setDis(true)
+        }
+        else
+        {
+        setIsCI(true)
+        setDis(false)
+        }
+      }
+
+      const onChangeBrand = (e) => {
+        var pass = e.target.value
+        let nrREG = new RegExp('^.{3,15}$')
+        if(!nrREG.test(pass)){
+         setIsBrand(false)
+         setDis(true)
+        }
+        else
+        {
+        setIsBrand(true)
+        setDis(false)
+        }
+    }
 
     useEffect(() => {
-
         const fetchElectricVehicle = async () => {
+            //trebe facut call catre charging stations si facut dupa un fel de 
+            // setcharginStationArray(response.data)
             try {
                 const {data} = await axios.get(`http://localhost:8000/api/electric_vehicle/${username}`);
-                console.log(data)
                 setIsNew(false)
-
                 setIdentification(data.identification);
                 setBrand(data.brand);
                 setModel(data.model);
                 setBatteryCapacity(data.battery_capacity);
             } catch (error){
-                console.log(error.response.data.message)
                 setIsNew(true)
-                console.log(isNew)
             }
         };
         fetchElectricVehicle();
@@ -36,11 +72,11 @@ const Car = () => {
 
     const showToastMessage = (message) =>
         toast.error(message, {
-            position: toast.POSITION.TOP_RIGHT
+            position: toast.POSITION.TOP_CENTER
         });
 
     const showSuccessToastMessageCar = (message) =>
-        toast.info(message, {
+        toast.success(message, {
             position: toast.POSITION.TOP_CENTER,
             autoClose: 3000
         });
@@ -66,67 +102,108 @@ const Car = () => {
                 }, 3000);
             }
         } catch (error) {
-            const errorMessage = error.response?.data?.message || 'An error occurred';
-            console.log(errorMessage);
-            showToastMessage(errorMessage);
+            showToastMessage('An error occurred');
         }
     };
 
+    const handleCheckboxChange = (event) => {
+        const value = parseInt(event.target.value);
+        if (checkedItems.has(value)) {
+          checkedItems.delete(value);
+        } else {
+          checkedItems.add(value);
+        }
+    
+        if (checkedItems.size === 0) {
+          checkedItems.add(value);
+        }
+    
+        setCheckedItems(new Set(checkedItems));
+      };
+
     return (
-        <div>
-            <ToastContainer />
-            <ClientNav/>
-            {isNew === true && (<p>Add Your Electric Vehicle Data</p>)}
-            {isNew !== true && (<p>Edit Your Electric Vehicle</p>)}
-            <form onSubmit={handleElectricVehicleOperation}>
-                <div>
-                    <label htmlFor="identification">Car Identification: </label>
-                    <input
-                        type="text"
-                        id="identification"
-                        value={identification}
-                        onChange={(e) => setIdentification(e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="brand">Brand: </label>
-                    <input
-                        type="text"
-                        id="brand"
-                        value={brand}
-                        onChange={(e) => setBrand(e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="model">Model: </label>
-                    <input
-                        type="text"
-                        id="model"
-                        value={model}
-                        onChange={(e) => setModel(e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="battery_capacity">Battery Capacity: </label>
-                    <input
-                        type="number"
-                        id="battery_capacity"
-                        value={battery_capacity}
-                        onChange={(e) => setBatteryCapacity(e.target.value)}
-                        required
-                    />
-                </div>
-
-                {isNew === true && (<button type="submit">Add Electric Vehicle</button>)}
-                {isNew !== true && (<button type="submit">Edit Data</button>)}
-            </form>
-        </div>
+        <div className="loginpage">
+        <ClientNav/>
+   <div className="car-form">
+       <ToastContainer />
+       <Card className={Classes.ELEVATION_3}>
+           <Form onSubmit={handleElectricVehicleOperation}>
+               <fieldset className="fieldset-bordered">
+                   <Form.Label>
+                   {isNew === true && <legend>Add Your Electric Vehicle Data</legend>}
+                   {isNew !== true && <legend>Edit Your Electric Vehicle</legend>}
+                   </Form.Label>
+                   <Form.Group>
+                       <Form.Label className ={isCI ? "Car identification" : "error-msg"}  >{isCI ? "Car identification" : "Invalid Format"} </Form.Label>
+                       <Form.Control type="text" required name="carid"
+                            value={identification}
+                           placeholder="Car identification" onChange={(e) => onChangeCI(e)}
+                           className ={isCI ? "Car identification" : "error-box"}/>
+                   </Form.Group>
+                   <div style={{display:"flex",gap:"50px"}}>
+                   <Form.Group style={{width:"100%"}}>
+                       <Form.Label className ={isBrand ? "Car identification" : "error-msg"}>{isBrand ? "Brand" : "Invalid Format"}</Form.Label>
+                       <Form.Control type="text" required name="brand" 
+                           value={brand}
+                           placeholder="Brand" onChange={(e) => onChangeBrand(e)} 
+                           className ={isBrand ? "Car identification" : "error-box"} />
+                   </Form.Group>
+                   <Form.Group style={{width:"100%"}}>
+                       <Form.Label>Model:</Form.Label>
+                       <Form.Control type="text" required name="model"
+                           placeholder="Model" value={model} />
+                   </Form.Group>
+                                       
+                   </div>
+                   <Form.Group>
+                       <Form.Label>Battery capacity(kW):</Form.Label>
+                       <Form.Control type="number" required name="maxcap"  onChange={(event) =>
+                                event.target.value < 0
+                                    ? (event.target.value = 0)
+                                    : event.target.value = Math.round(event.target.value)
+                            }
+                            value={battery_capacity}
+                           placeholder="Battery capacity" />
+                   </Form.Group>
+                   <Form.Group>
+                    <Form.Label>Favourite Charging Station:</Form.Label>
+                    <Form.Select aria-label="Default select example" name= "fcs" style={{ width: "100%" }}>
+                    { charginStationArray.map((charginStation) => (
+                                   <option value={[charginStation.id]}>{charginStation.name}</option>
+                               ))
+                    }
+                    </Form.Select>
+                </Form.Group>
+                <Form.Group>
+                       <Form.Label>Your availability:</Form.Label>
+                       <div style={{display:"flex",justifyContent:"space-between",width: "100%"}}>
+                       {ore.map((element) => (
+                        <Form.Check
+                        key={element}
+                        type="checkbox"
+                        id={`checkbox-${element}`}
+                        label={element}
+                        value={element}
+                        checked={checkedItems.has(element)}
+                        onChange={handleCheckboxChange}
+                        />
+                        ))}</div>
+                   </Form.Group>
+                   <div>
+                    <Form.Label>Set Preference Order:</Form.Label>
+                    <PreferenceOrder values={values} />
+                    </div>
+                   <Form.Group style={{display:"flex",flexDirection:"column"}}>
+                   <Form.Label style={{fontWeight: "bold",fontSize:15,color:"#dc3545"}}>{errorMessage}</Form.Label>
+                   </Form.Group>
+                   <Button className="but" variant="warning" disabled={disbl} type="submit" style={{ margin: "10px" }}>
+                      {isNew ? "Add car" : "Edit car"}
+                   </Button>
+               </fieldset>
+           </Form>
+       </Card>
+   </div>
+</div>
     );
 };
 

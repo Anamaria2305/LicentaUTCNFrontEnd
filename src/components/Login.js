@@ -23,13 +23,12 @@ const Login = () => {
                 "http://localhost:8000/api/login",
                 { uname, pass }
             );
-            console.log(response.data)
+            //insert my api here
             localStorage.setItem("token", response.data.token);
             localStorage.setItem("username", response.data.username);
             localStorage.setItem("role", response.data.role);
             navigate('/home');
         } catch (error) {
-            console.log(error);
             showToastMessage();
         }
 
@@ -46,9 +45,9 @@ const Login = () => {
                                 <legend>LogIn Form</legend>
                             </Form.Label>
                             <Form.Group>
-                                <Form.Label>Username :</Form.Label>
+                                <Form.Label>E-mail :</Form.Label>
                                 <Form.Control type="text" required name="uname"
-                                    placeholder="Username/e-mail" />
+                                    placeholder="E-mail" />
                             </Form.Group>
                             <Form.Group>
                                 <Form.Label>Password:</Form.Label>

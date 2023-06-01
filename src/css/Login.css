@@ -13,7 +13,27 @@
     text-align: center;
 }
 
+.car-form{
+    top: 9.3%;
+    left: 26%;
+    position: absolute;
+    width: 700px;
+    height: auto;
+    text-align: center;
+}
 .fieldset-bordered {
     border: 1px solid #6c757d;
     padding: .5rem;
+}
+
+.error-msg{
+    color:	#DC3545;
+    font-weight: bold;
+}
+
+.error-box.form-control:focus{
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25); /* Customize the focus shadow */
+    border-color: #DC3545!important;
+    border: 3px solid;
 }

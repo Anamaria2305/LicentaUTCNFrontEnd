@@ -2,7 +2,6 @@ import logo from './res/images/energy-icon.webp';
 import './App.css';
 import {NavLink} from 'react-router-dom';
 import {APP_NAME} from './res/STRINGS';
-import AdminNav from "./navbars/AdminNav";
 import React from "react";
 import "@blueprintjs/core/lib/css/blueprint.css";
 function App() {
