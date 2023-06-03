@@ -14,7 +14,9 @@ const Car = () => {
     const [battery_capacity, setBatteryCapacity] = useState('');
     const [isNew, setIsNew] = useState(true);
     const [charginStationArray, setcharginStationArray] = useState([{id:"1",name:"nume"},{id:"2",name:"nume2"}]);
-    const username = localStorage.getItem('username')
+
+    const myemail = localStorage.getItem('email')
+
     const [errorMessage, setMessage] = useState("");
     const [disbl, setDis] = useState(false);
     const [ore,setOre] = useState([8,9,10,11,12,13])
@@ -25,6 +27,7 @@ const Car = () => {
     const [isBrand, setIsBrand] = useState(true);
 
     const onChangeCI = (e) => {
+        setIdentification(e.target.value)
         var nr = e.target.value
         let nrREG = new RegExp("^(?:[A-Z]{1,2}\\d{2}(?:\\d{1})?[A-Z]{3})$");
         if(!nrREG.test(nr)){
@@ -39,6 +42,7 @@ const Car = () => {
       }
 
       const onChangeBrand = (e) => {
+        setBrand(e.target.value)
         var pass = e.target.value
         let nrREG = new RegExp('^.{3,15}$')
         if(!nrREG.test(pass)){
@@ -52,12 +56,23 @@ const Car = () => {
         }
     }
 
+    const onChangeBatteryCapacity = (e) => {
+        e.target.value < 0
+            ? (e.target.value = 0)
+            : e.target.value = Math.round(e.target.value)
+        setBatteryCapacity(e.target.value)
+    }
+
+    const onChangeModel = (e) => {
+        setModel(e.target.value)
+    }
+
     useEffect(() => {
         const fetchElectricVehicle = async () => {
             //trebe facut call catre charging stations si facut dupa un fel de 
             // setcharginStationArray(response.data)
             try {
-                const {data} = await axios.get(`http://localhost:8000/api/electric_vehicle/${username}`);
+                const {data} = await axios.get(`http://localhost:8000/api/electric_vehicle/${myemail}`);
                 setIsNew(false)
                 setIdentification(data.identification);
                 setBrand(data.brand);
@@ -85,7 +100,7 @@ const Car = () => {
         e.preventDefault();
         try {
             const url = "http://localhost:8000/api/electric_vehicle";
-            const data = { identification, brand, model, battery_capacity, username };
+            const data = { identification, brand, model, battery_capacity, myemail };
 
             if (isNew) {
                 await axios.post(url, data);
@@ -145,23 +160,23 @@ const Car = () => {
                        <Form.Label className ={isBrand ? "Car identification" : "error-msg"}>{isBrand ? "Brand" : "Invalid Format"}</Form.Label>
                        <Form.Control type="text" required name="brand" 
                            value={brand}
-                           placeholder="Brand" onChange={(e) => onChangeBrand(e)} 
+                           placeholder="Brand" onChange={(e) => onChangeBrand(e)}
                            className ={isBrand ? "Car identification" : "error-box"} />
                    </Form.Group>
                    <Form.Group style={{width:"100%"}}>
                        <Form.Label>Model:</Form.Label>
-                       <Form.Control type="text" required name="model"
-                           placeholder="Model" value={model} />
+                       <Form.Control
+                           type="text"
+                           required name="model"
+                           placeholder="Model"
+                           onChange={(e) => onChangeModel(e)}
+                           value={model} />
                    </Form.Group>
                                        
                    </div>
                    <Form.Group>
                        <Form.Label>Battery capacity(kW):</Form.Label>
-                       <Form.Control type="number" required name="maxcap"  onChange={(event) =>
-                                event.target.value < 0
-                                    ? (event.target.value = 0)
-                                    : event.target.value = Math.round(event.target.value)
-                            }
+                       <Form.Control type="number" required name="maxcap"  onChange={(e) => onChangeBatteryCapacity(e)}
                             value={battery_capacity}
                            placeholder="Battery capacity" />
                    </Form.Group>

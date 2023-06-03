@@ -21,17 +21,17 @@ const Login = () => {
         try {
             const response = await axios.post(
                 "http://localhost:8000/api/login",
-                { uname, pass }
+                { uname: uname.value, pass: pass.value }
             );
             //insert my api here
+            console.log(response.data.email)
             localStorage.setItem("token", response.data.token);
-            localStorage.setItem("username", response.data.username);
+            localStorage.setItem("email", response.data.email);
             localStorage.setItem("role", response.data.role);
             navigate('/home');
         } catch (error) {
             showToastMessage();
         }
-
     }
 
     return (
@@ -42,7 +42,7 @@ const Login = () => {
                     <Form onSubmit={handleLogin}>
                         <fieldset className="fieldset-bordered">
                             <Form.Label>
-                                <legend>LogIn Form</legend>
+                                <legend>Log in to the Application</legend>
                             </Form.Label>
                             <Form.Group>
                                 <Form.Label>E-mail :</Form.Label>

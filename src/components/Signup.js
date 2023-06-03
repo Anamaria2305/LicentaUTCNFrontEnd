@@ -32,12 +32,16 @@ function SignupPage() {
 
     const handleSignup = async (e) => {
         e.preventDefault();
-        var { uname,phone, pass } = document.forms[0];
+        console.log('here')
+        var { uname, phone, pass } = document.forms[0];
         try {
             const role = 'Client'
+            console.log(uname.value)
+            console.log(uname.phone)
+            console.log(uname.pass)
             const response = await axios.post(
                 "http://localhost:8000/api/signup",
-                {uname,phone, pass, role}
+                {uname: uname.value, pass: pass.value, phone: phone.value, role}
             );
             // insert also my api here
             showSuccessToastMessage();
@@ -45,6 +49,7 @@ function SignupPage() {
                 navigate('/login');
             }, 3000);
         } catch (error) {
+            console.log(error)
             showToastMessage("Something went wrong, please try again.");
         }
         setEmail('');

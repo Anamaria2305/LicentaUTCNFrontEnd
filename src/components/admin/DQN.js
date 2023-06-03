@@ -1,4 +1,5 @@
-import { Bar } from "react-chartjs-2";
+// import { Bar } from "react-chartjs-2";
+import { Line } from 'react-chartjs-2';
 import { BarElement,  CategoryScale,Chart as ChartJS,Legend, LinearScale,Title, Tooltip } from "chart.js";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -25,11 +26,45 @@ const center = {
 function DQN() {
 
     const [energyDifferences, setEnergyDifferences] = useState('');
+    const [energyDifferencesAfter, setEnergyDifferencesAfter] = useState('');
     const [chargeOrDischarge, setChargeOrDischarge] = useState('');
     const [selectedElement, setSelectedElement] = useState(null);
     const [showInfoWindow, setInfoWindowFlag] = useState(false);
     const [selectedMarkerPosition, setSelectedMarkerPosition] = useState(null);
     const [locations, setLocations] = useState([]);
+
+        const LINEdata = {
+            labels: ["13:00", "14:00", "15:00"],
+            datasets: [
+                {
+
+                    label: "Energy Differences(KW)",
+                    data: energyDifferences,
+                    backgroundColor: ["green"],
+                    borderColor: ["green"],
+                    borderWidth: 0.5,
+
+                    // label: 'Dataset 1',
+                    // data: [65, 59, 80, 81, 56, 55],
+                    fill: false,
+                    // borderColor: 'red',
+                    tension: 0.4,
+                },
+                {
+                    label: "Energy Differences New(KW)",
+                    data: energyDifferencesAfter,
+                    backgroundColor: ["red"],
+                    borderColor: ["red"],
+                    borderWidth: 0.5,
+
+                    // label: 'Dataset 1',
+                    // data: [65, 59, 80, 81, 56, 55],
+                    fill: false,
+                    // borderColor: 'red',
+                    tension: 0.4,
+                },
+            ],
+        };
 
     const handleChargeOrDischarge = (event) => {
         setChargeOrDischarge(event.target.value);
@@ -89,8 +124,8 @@ function DQN() {
                 };
             });
             setLocations(modifiedLocations);
-
-            setEnergyDifferences(response.data.energy_diff)
+            setEnergyDifferencesAfter(response.data.energy_diff)
+            //setEnergyDifferences(response.data.energy_diff)
         } catch (error) {
             console.log(error);
         }
@@ -117,29 +152,30 @@ function DQN() {
             Make scheduling
             </Button>
             <div>
-                <Bar
-                    data={{
-                        labels: ["13:00", "14:00", "15:00"],
-                        datasets: [
-                            {
-                                label: "Energy Differences(KW)",
-                                data: energyDifferences,
-                                backgroundColor: ["green"],
-                                borderColor: ["green"],
-                                borderWidth: 0.5,
-                            },
-                        ],
-                    }}
-                    height={400}
-                    options={{
-                        maintainAspectRatio: false,
-                        scales: { yAxes: [{ ticks: { beginAtZero: true } }] },
-                    }}
-                    type={Bar}
-                />
+                {/*<Bar*/}
+                {/*    data={{*/}
+                {/*        labels: ["13:00", "14:00", "15:00"],*/}
+                {/*        datasets: [*/}
+                {/*            {*/}
+                {/*                label: "Energy Differences(KW)",*/}
+                {/*                data: energyDifferences,*/}
+                {/*                backgroundColor: ["green"],*/}
+                {/*                borderColor: ["green"],*/}
+                {/*                borderWidth: 0.5,*/}
+                {/*            },*/}
+                {/*        ],*/}
+                {/*    }}*/}
+                {/*    height={400}*/}
+                {/*    options={{*/}
+                {/*        maintainAspectRatio: false,*/}
+                {/*        scales: { yAxes: [{ ticks: { beginAtZero: true } }] },*/}
+                {/*    }}*/}
+                {/*    type={Bar}*/}
+                {/*/>*/}
+                <Line data={LINEdata}/>
             </div>
             <Button type='submit' variant='info' style={{margin:"10px"}}>
-            Make scheduling
+            Finalize
             </Button>
 
             <LoadScript googleMapsApiKey="AIzaSyALD8glYng1LfMqO-tQLhUpVcCQOc6sSfU">

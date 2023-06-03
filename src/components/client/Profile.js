@@ -9,10 +9,11 @@ import { Button, Form } from "react-bootstrap";
 import { Card, Classes } from "@blueprintjs/core";
 import "../../css/Login.css";
 import { validate } from 'react-email-validator';
+
 const Profile = () => {
     const [showPassword, setShowPassword] = useState(false);
 
-    const username = localStorage.getItem('username')
+    const myemail = localStorage.getItem('email')
 
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
@@ -23,16 +24,17 @@ const Profile = () => {
     const [errorMessage3, setMessage3] = useState("");
 
     useEffect(() => {
+
         const fetchUser = async () => {
-            // const { data } = await axios.get(`http://localhost:8000/api/users/${username}`);
-            // console.log(data)
-            // setUserName(data.username);
-            // setEmail(data.email);
-            // setPhone(data.phone);
-            // setPassword(data.password);
+            console.log(myemail)
+            const { data } = await axios.get(`http://localhost:8000/api/users/${myemail}`);
+            console.log(data)
+            setEmail(data.email);
+            setPhone(data.phone);
+            setPassword(data.password);
         };
         fetchUser();
-    }, [username]);
+    }, [myemail]);
 
     const showSuccessToastMessageEditUser = (message) =>
         toast.info(message, {
@@ -50,10 +52,10 @@ const Profile = () => {
         e.preventDefault();
         try {
             const url = "http://localhost:8000/api/users";
-            const data = {email, phone, password, username};
+            const data = {email, phone, password, myemail};
             await axios.put(url, data);
-            localStorage.removeItem('username');
-            localStorage.setItem('username', email);
+            localStorage.removeItem('email');
+            localStorage.setItem('email', email);
             showSuccessToastMessageEditUser('User data has been added successfully! Page will be reloaded');
             setTimeout(() => {
                 window.location.reload()
@@ -68,6 +70,7 @@ const Profile = () => {
     }
 
     const onChangeEmail = (e) => {
+        setEmail(e.target.value)
         var email = e.target.value
         if(!validate(email)){
          setMessage("E-mail invalid.")
@@ -79,6 +82,7 @@ const Profile = () => {
       }
     
       const onChangePhone = (e) => {
+        setPhone(e.target.value)
         var nr = e.target.value
         let nrREG = new RegExp('^(0([7][457623])([0-9]){7})$')
         if(!nrREG.test(nr)){
@@ -93,6 +97,7 @@ const Profile = () => {
       }
 
       const onChangePass = (e) => {
+        setPassword(e.target.value)
         var pass = e.target.value
         let nrREG = new RegExp('^.{6,15}$')
         if(!nrREG.test(pass)){
@@ -119,17 +124,31 @@ const Profile = () => {
                         </Form.Label>
                         <Form.Group>
                             <Form.Label>E-mail :</Form.Label>
-                            <Form.Control type="text" required name="uname" onChange={(e) => onChangeEmail(e)}
+                            <Form.Control
+                                type="text"
+                                required name="uname"
+                                value={email}
+                                onChange={(e) => onChangeEmail(e)}
                                 placeholder="E-mail" />
                         </Form.Group>
                         <Form.Group>
                         <Form.Label>Phone number:</Form.Label>
-                        <Form.Control type="number" required name= "tel" onChange={(e) => onChangePhone(e)} placeholder="Phone" />
+                        <Form.Control
+                            type="number"
+                            required name= "tel"
+                            value={phone}
+                            onChange={(e) => onChangePhone(e)}
+                            placeholder="Phone" />
                         </Form.Group>
                         <Form.Group>
                         <Form.Label>Password:</Form.Label>
                         <div style={{ display: "flex" }}>
-                        <Form.Control type={showPassword ? "text" : "password"} required name="pass" placeholder="Password" onChange={(e) => onChangePass(e)} />
+                        <Form.Control
+                            type={showPassword ? "text" : "password"}
+                            required name="pass"
+                            value={password}
+                            placeholder="Password"
+                            onChange={(e) => onChangePass(e)} />
                         <FontAwesomeIcon style={{height:"20px",position:"absolute",right:"5%",top:"242px"}} onClick={toggleShowPassword} icon={showPassword ? faEye : faEyeSlash}/>
                         </div>
                         </Form.Group>
