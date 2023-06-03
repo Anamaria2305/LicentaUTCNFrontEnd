@@ -4,6 +4,7 @@ import {NavLink} from 'react-router-dom';
 import {APP_NAME} from './res/STRINGS';
 import React from "react";
 import "@blueprintjs/core/lib/css/blueprint.css";
+import 'react-responsive-modal/styles.css';
 function App() {
   return <div className="App">
     <header className="App-header">

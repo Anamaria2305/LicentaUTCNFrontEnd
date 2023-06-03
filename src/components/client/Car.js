@@ -139,7 +139,7 @@ const Car = () => {
     return (
         <div className="loginpage">
         <ClientNav/>
-   <div className="car-form">
+        <div className="car-form">
        <ToastContainer />
        <Card className={Classes.ELEVATION_3}>
            <Form onSubmit={handleElectricVehicleOperation}>

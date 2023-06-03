@@ -29,7 +29,7 @@ const Scheduler = () => {
         <div>
         <AdminNav/>
         <div style={{display:"flex",gap:"100px", justifyContent: 'center', alignItems: 'center'}}>   
-            <Button variant='info' disabled={button1Disabled} style={{margin:'20px'}}
+            <Button variant='primary' disabled={button1Disabled} style={{margin:'20px'}}
         onClick={handleButton1Click}>
             Deep Q-Network
             </Button>
