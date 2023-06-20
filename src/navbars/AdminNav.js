@@ -14,15 +14,15 @@ function AdminNav() {
     const navigate = useNavigate();
 
     async function handleLogout() {
-        let username = localStorage.getItem("username")
-        try {
-            const response = await axios.post(
-                "http://localhost:8000/api/logout",
-                {username}
-            );
-        } catch (error) {
-            console.log(error);
-        }
+        // let username = localStorage.getItem("username")
+        // try {
+        //     const response = await axios.post(
+        //         "http://localhost:8000/api/logout",
+        //         {username}
+        //     );
+        // } catch (error) {
+        //     console.log(error);
+        // }
         localStorage.removeItem("token");
         localStorage.removeItem("email");
         localStorage.removeItem("role");

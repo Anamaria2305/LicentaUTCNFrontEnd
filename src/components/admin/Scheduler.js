@@ -39,7 +39,7 @@ const Scheduler = () => {
             Whale Optimization
             </Button>
             </div>
-        <div className="scheduler-container">
+        <div>
             {(isFirstClick && button1Disabled) === true && (<DQN/>)}
         </div>
         <div className="woa-container">

@@ -14,6 +14,7 @@ import Car from './components/client/Car';
 import Profile from './components/client/Profile';
 import Notifications from './components/client/Notifications';
 import Home from "./components/Home";
+import Train from "./components/admin/Train";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -28,6 +29,7 @@ root.render(
             <Route path='/profile' element={<Profile/>}/>
             <Route path='/notifications' element={<Notifications/>}/>
             <Route path='/signup' element={<Signup/>}/>
+            <Route path='/train' element={<Train/>}/>
         </Routes>
     </BrowserRouter>
 );

@@ -1,26 +1,35 @@
 import AdminNav from "../../navbars/AdminNav";
 import React from "react";
-import axios from "axios";
 import { Button, Form, Table } from "react-bootstrap";
 import { Card, Classes } from "@blueprintjs/core";
 import "../../css/Login.css";
 import { useState} from 'react';
 import {toast, ToastContainer} from "react-toastify";
 import { Modal } from 'react-responsive-modal';
-import { Line } from 'react-chartjs-2';
 import { GoogleMap, Marker, LoadScript, InfoWindow } from "@react-google-maps/api";
+import axios from "axios";
+import {useNavigate} from "react-router-dom";
+import {Line} from "react-chartjs-2";
+import { Pie } from "react-chartjs-2";
 const Experiment = () => {
 
-    const [charginStationArray, setcharginStationArray] = useState([1,2,3,4])
+    const [charginStationArray, setcharginStationArray] = useState([1,2,3,4,5,6])
     const [scheduleHoursArray, setscheduleHoursArray] = useState([1,2,3,4,5,6,7,8,9,10,20])
     const [cars, setCars] = useState();
     const [startHour, setStartHour] = useState(0);
     const [hours, setHours] = useState(scheduleHoursArray[0]);
     const [cs, setCS] = useState(charginStationArray[0]);
     const [disbl, setDis] = useState(false);
-    const [selectedOption, setSelectedOption] = useState('charge');
+    const [selectedOption, setSelectedOption] = useState('Charge');
     const [selectedOptionAlg, setSelectedOptionAlg] = useState('DQN');
     const [messagePlugs, setMsg]  = useState('Plugs are equal to the charging stations');
+    const [energyDifferencesDQN, setEnergyDifferencesDQN] = useState('');
+    const [energyDifferencesAfterDQN, setEnergyDifferencesAfterDQN] = useState('');
+    const [selectedLineIntervalDQN, setSelectedLineIntervalDQN] = useState('');
+    const [rewardsDQN, setRewardsDQN] = useState();
+
+    const navigate = useNavigate();
+
 
     const [open, setOpen] = useState(false);
     const onOpenModal = () => setOpen(true);
@@ -106,28 +115,94 @@ const Experiment = () => {
           ],
       };
 
-
     const handleRadioChange = (event) => {
         setSelectedOption(event.target.value);
-      };
+    };
 
     const handleRadioChangeAlg = (event) => {
         setSelectedOptionAlg(event.target.value);
         if(event.target.value == 'WOA'){
             setMsg("Plugs are two times the charging stations")
+        } else{
+            setMsg("Plugs are equal to the charging stations")
         }
-      };
+    };
+
+    const PIEdataDQN = {
+        labels: ["Optimal", "Non_Optimal", "Worst"],
+        datasets: [
+            {
+                data: rewardsDQN,
+                backgroundColor: ["#36A2EB", "#FF6384", "#FF3911"],
+                hoverBackgroundColor: ["#36A2EB", "#FF6384", "#FF3911"],
+            },
+        ],
+    };
+
+    const LINEdataDQN = {
+        labels: selectedLineIntervalDQN,
+        datasets: [
+            {
+                label: "Energy Differences(KW)",
+                data: energyDifferencesDQN,
+                backgroundColor: ["green"],
+                borderColor: ["green"],
+                borderWidth: 0.5,
+                fill: false,
+                tension: 0.4
+            },
+            {
+                label: "Energy Differences New(KW)",
+                data: energyDifferencesAfterDQN,
+                backgroundColor: ["red"],
+                borderColor: ["red"],
+                borderWidth: 0.5,
+                fill: false,
+                tension: 0.4
+            },
+        ],
+    };
+
+    const showDQNErrorToastMessage = (message) =>
+        toast.error(message, {
+            position: toast.POSITION.TOP_CENTER
+        });
 
     const handleExperiments = async (e) => {
         e.preventDefault()
         if(selectedOptionAlg === "DQN"){
-            onOpenModal()
+            try {
+                const response = await axios.post(
+                    "http://localhost:8000/api/experiment",
+                    {cs, hours, cars, selectedOption, startHour}
+                );
+                console.log(response.data)
+
+                let timeDifference = parseInt(startHour) + parseInt(hours)
+                let lineIntervalDQN = []
+
+                for(let i=startHour; i< timeDifference; i++){
+                    lineIntervalDQN.push(i)
+                }
+
+                setEnergyDifferencesDQN(response.data.predicted_energy_differences)
+                setEnergyDifferencesAfterDQN(response.data.new_energy_differences)
+
+                setSelectedLineIntervalDQN(lineIntervalDQN)
+                console.log(response.data.rewards)
+                setRewardsDQN(response.data.rewards)
+                onOpenModal()
+
+            } catch (error) {
+                showDQNErrorToastMessage(error.response.data.message);
+            }
+
         } else if(selectedOptionAlg==="WOA"){
             const params = new URLSearchParams({
                 timeSlots: parseInt(hours),
                 startTime: parseInt(startHour),
-                chargeType: selectedOption, 
-                maxCars: parseInt(cars), 
+                chargeType: selectedOption,
+                maxCars: parseInt(cars),
                 chargingStations: parseInt(cs)
               }).toString();
               const params2 = new URLSearchParams({
@@ -162,9 +237,9 @@ const Experiment = () => {
                 setEuclidean(res.data[11][0])
                 onOpenWOAModal()
               } catch (error) {
-                
+
                 showToastMessage("Something went wrong with the experiment.")
-                
+
               }
         } else {
             showToastMessage("Something went wrong with the selection.")
@@ -242,6 +317,10 @@ const Experiment = () => {
         return options;
       };
 
+    function trainModel() {
+        navigate('/train');
+    }
+
     return (
         <div className="loginpage">
         <AdminNav/>
@@ -281,14 +360,18 @@ const Experiment = () => {
                     </Form.Group>
                    <Form.Group>
                        <Form.Label>Number of Electric Vehicles:</Form.Label>
-                       <Form.Control type="number" required name="cars"  onChange={(e) => onChangeCars(e)}
+                       <Form.Control
+                           type="number"
+                           required
+                           name="cars"
+                           onChange={(e) => onChangeCars(e)}
                            placeholder="Electric Vehicles" />
                    </Form.Group>
                    <Form.Group style={{marginTop:"5px"}}>
                    <Form.Label> Choose energy curve: </Form.Label>
                    <div>
-                   <Form.Check type="radio" inline value="charge" label="Charge" name="radioGroup" defaultChecked onChange={handleRadioChange}/>
-                   <Form.Check type="radio" inline value="discharge" label="Discharge" name="radioGroup" onChange={handleRadioChange}/>
+                   <Form.Check type="radio" inline value="Charge" label="Charge" name="radioGroup" defaultChecked onChange={handleRadioChange}/>
+                   <Form.Check type="radio" inline value="Discharge" label="Discharge" name="radioGroup" onChange={handleRadioChange}/>
                    </div></Form.Group>
                    <Form.Group controlId="hourSelect">
                    <Form.Label>Select Starting Hour:</Form.Label>
@@ -302,21 +385,32 @@ const Experiment = () => {
                    <Button className="but" variant="primary" disabled={disbl} type="submit" style={{ margin: "10px" }}>
                         See scheduling
                    </Button>
+                   {selectedOptionAlg==='DQN' &&
+                   <Button className="but" variant="primary" type="submit" style={{ margin: "10px" }} onClick={trainModel}>
+                       Train a Model
+                   </Button>}
                </fieldset>
            </Form>
        </Card>
    </div>
                     
         <Modal open={open} onClose={onCloseModal} center>
-        <h2>Simple centered modalasdvghsabjdhbs
-        dcgfvbhsdchfvbsdcfvgbhnjhgfsaxvgfnh
-        jkmhbgfdsvgfhnyjm</h2>
-        <h2>Simple centered modalasdvghsabjdhbs
-        dcgfvbhsdchfvbsdcfvgbhnjhgfsaxvgfnh
-        jkmhbgfdsvgfhnyjm</h2>
-        <h2>Simple centered modalasdvghsabjdhbs
-        dcgfvbhsdchfvbsdcfvgbhnjhgfsaxvgfnh
-        jkmhbgfdsvgfhnyjm</h2>
+            <div style={{width: "600px", paddingTop: "18px"}}>
+                <Line
+                    data={LINEdataDQN}
+                    options={{
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }}
+                />
+            </div>
+
+            <div style={{width: "350px", paddingTop: "18px"}}>
+                <Pie data={PIEdataDQN} />
+            </div>
         </Modal>
 
         <Modal open={openWOA} onClose={onCloseWOAModal}  center styles={{
@@ -331,11 +425,11 @@ const Experiment = () => {
             <h5>Correlation coefficient between the curves is: <b>{correlation}</b></h5>
             </div>}
         <div><h3>Fitness Evolution</h3></div>
-        <div> 
+        <div>
         <Line data={fitnessData}/>
         </div>
         <div><h3>Euclidean Distance Diversity Each Iterations</h3></div>
-        <div> 
+        <div>
         <Line data={euclideanData}/>
         </div>
         <div><h3>Convergence Rate: <b>{convRate}</b></h3></div>
@@ -344,18 +438,18 @@ const Experiment = () => {
         <Table bordered className='woa-table' style={{marginTop:'10px',width:"750px",margin:"auto",marginBottom:"10px", borderColor:"green"}}>
                 <thead>
                     <tr className='table-success woa-table'>
-                        <th className='woa-table' style={{textAlign:"center"}}>Number of Constraints Violated</th>  
-                        <th className='woa-table' style={{textAlign:"center"}}>Penalty for Charging Station</th>  
-                        <th className='woa-table' style={{textAlign:"center"}}>Penalty for Time Availability</th>  
+                        <th className='woa-table' style={{textAlign:"center"}}>Number of Constraints Violated</th>
+                        <th className='woa-table' style={{textAlign:"center"}}>Penalty for Charging Station</th>
+                        <th className='woa-table' style={{textAlign:"center"}}>Penalty for Time Availability</th>
                     </tr>
-                </thead>         
+                </thead>
                       <tbody>
                       <tr className='table-success woa-table'>
                               <td className='woa-table' style={{textAlign:"center"}}>{constraintsPenalties[0]}</td>
                               <td className='woa-table' style={{textAlign:"center"}}>{constraintsPenalties[1]}</td>
                               <td className='woa-table' style={{textAlign:"center"}}>{constraintsPenalties[2]}</td>
 
-                     </tr>                                                
+                     </tr>
                   </tbody>
            </Table>
         </Modal>

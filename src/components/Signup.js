@@ -33,15 +33,16 @@ function SignupPage() {
     const handleSignup = async (e) => {
         e.preventDefault();
         console.log('here')
-        var { uname, phone, pass } = document.forms[0];
+        var { uname, tel, pass } = document.forms[0];
         try {
             const role = 'Client'
             console.log(uname.value)
-            console.log(uname.phone)
-            console.log(uname.pass)
+            console.log(tel.value)
+            console.log(pass.value)
+            console.log(role)
             const response = await axios.post(
                 "http://localhost:8000/api/signup",
-                {uname: uname.value, pass: pass.value, phone: phone.value, role}
+                {uname: uname.value, pass: pass.value, phone: tel.value, role}
             );
             // insert also my api here
             showSuccessToastMessage();
