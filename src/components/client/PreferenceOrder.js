@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useState,useEffect  } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 
-function PreferenceOrder({ values }) {
+function PreferenceOrder({ values,onPreferenceChange  }) {
   const [orderedValues, setOrderedValues] = useState(values);
+
+  useEffect(() => {
+    setOrderedValues(values);
+  }, [values]);
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
@@ -12,6 +16,7 @@ function PreferenceOrder({ values }) {
     newValues.splice(result.destination.index, 0, reorderedValue);
   
     setOrderedValues(newValues);
+    onPreferenceChange(newValues);
   };
 
   return (

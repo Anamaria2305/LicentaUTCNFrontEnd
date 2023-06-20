@@ -8,7 +8,7 @@ import {toast, ToastContainer} from "react-toastify";
 import { Modal } from 'react-responsive-modal';
 import { GoogleMap, Marker, LoadScript, InfoWindow } from "@react-google-maps/api";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import {useNavigate,Link} from "react-router-dom";
 import {Line} from "react-chartjs-2";
 import { Pie } from "react-chartjs-2";
 const Experiment = () => {
@@ -320,7 +320,8 @@ const Experiment = () => {
     function trainModel() {
         navigate('/train');
     }
-
+    const role = localStorage.getItem("role");
+    if(role === "Admin")
     return (
         <div className="loginpage">
         <AdminNav/>
@@ -455,6 +456,12 @@ const Experiment = () => {
         </Modal>
         </div>
     );
+    else return (<div className='App2'><h1>You are not allowed here!</h1>
+    <h2>Authenticate and come back. Click the button down below.</h2>
+    <div className='content'  style={{ display: "flex" , justifyContent: "space-around"}}>
+      <Link  to="/login"  style={{color: 'red',backgroundColor: '#ffd7b5',fontSize: '24px',fontWeight: 'bold',padding: '10px 20px',borderRadius: '5px',textDecoration: 'none',}}> Log In </Link>
+</div>
+</div>)
 };
 
 export default Experiment;

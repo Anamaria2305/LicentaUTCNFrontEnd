@@ -27,11 +27,19 @@ const Profile = () => {
 
         const fetchUser = async () => {
             console.log(myemail)
-            const { data } = await axios.get(`http://localhost:8000/api/users/${myemail}`);
-            console.log(data)
-            setEmail(data.email);
-            setPhone(data.phone);
-            setPassword(data.password);
+            try {
+                const { data } = await axios.get(`http://localhost:8000/api/users/${myemail}`);
+                console.log(data)
+                setEmail(data.email);
+                setPhone(data.phone);
+                setPassword(data.password);
+            } catch (error) {
+                const { data } = await axios.get(`http://localhost:8080/crud/driver?username=`+myemail);
+                console.log(data)
+                setEmail(data.username);
+                setPhone(data.phone);
+                setPassword(data.password);
+            }
         };
         fetchUser();
     }, [myemail]);
@@ -61,7 +69,22 @@ const Profile = () => {
                 window.location.reload()
             }, 3005);
         } catch (error) {
-            showErrorToastMessageEditUser( 'An error occurred')
+            try {
+
+                const response = await axios.post(
+                    "http://localhost:8080/crud/saveDV",
+                    {id: localStorage.getItem("id"), username: email, password: password, phone: phone}
+                );
+
+                localStorage.removeItem('email');
+                localStorage.setItem('email', email);
+                showSuccessToastMessageEditUser('User data has been added successfully! Page will be reloaded');
+                setTimeout(() => {
+                    window.location.reload()
+                }, 3005);
+            } catch (error) {
+                showErrorToastMessageEditUser( 'An error occurred')
+            }
         }
     }
 

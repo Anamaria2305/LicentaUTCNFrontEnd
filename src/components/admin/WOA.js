@@ -50,7 +50,7 @@ const WOA = () => {
 
     useEffect(() => {
 
-        axios.get("http://localhost:8080/ev/ediff?plugs=10&startTime=8&chargeType=charge")
+        axios.get("http://localhost:8080/ev/ediff?plugs=3&startTime=8&chargeType=Charge")
         .then((response) => {
             let copieore = []
             setoldediff(response.data)
@@ -66,7 +66,7 @@ const WOA = () => {
     },[]);
 
     async function makePrediction() {
-        axios.get("http://localhost:8080/ev/sol?timeSlots=10&startTime=8&chargeType=charge&maxCars=80&sampleSize=50")
+        axios.get("http://localhost:8080/ev/sol?timeSlots=3&startTime=8&chargeType=Charge&maxCars=24&sampleSize=50")
         .then(res => {
         setnewediff(res.data[0]);
         setCarCharge(res.data[1]);
@@ -102,7 +102,6 @@ const WOA = () => {
         setSelectedElement(location);
         setInfoWindowFlag(true);
         setSelectedMarkerPosition({ lat: location.latitude, lng: location.longitude });
-        console.log(msjStatii)
     };
 
     const handleInfoWindowClose = () => {

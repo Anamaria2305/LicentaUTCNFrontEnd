@@ -44,14 +44,23 @@ function SignupPage() {
                 "http://localhost:8000/api/signup",
                 {uname: uname.value, pass: pass.value, phone: tel.value, role}
             );
-            // insert also my api here
             showSuccessToastMessage();
             setTimeout(() => {
                 navigate('/login');
             }, 3000);
         } catch (error) {
-            console.log(error)
-            showToastMessage("Something went wrong, please try again.");
+            try {
+                const response = await axios.post(
+                    "http://localhost:8080/crud/saveDV",
+                    {username: uname.value, password: pass.value, phone: tel.value}
+                );
+                showSuccessToastMessage();
+                setTimeout(() => {
+                    navigate('/login');
+                }, 3000);
+            } catch (error) {
+                showToastMessage("Something went wrong, please try again.");
+            }
         }
         setEmail('');
         setPhone('');

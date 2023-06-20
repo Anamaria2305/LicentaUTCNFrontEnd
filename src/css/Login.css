@@ -37,3 +37,24 @@
     border-color: #DC3545!important;
     border: 3px solid;
 }
+
+.custom-card {
+    top: 9.3%;
+    left: 27.5%;
+    position: absolute;
+    width: 700px;
+    height: auto;
+    text-align: center;
+    background-color: #FFD8A8;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 4px 0 rgba(255, 87, 34, 0.3);
+    background-image: linear-gradient(90deg, #FFD8A8, #FFA94D);
+  }
+  
+  .custom-card pre {
+    font-size: 16px;
+    color: #FF5722;
+    margin: 8px 0;
+    font-weight: bold;
+  }

@@ -13,7 +13,7 @@ const Car = () => {
     const [model, setModel] = useState('');
     const [battery_capacity, setBatteryCapacity] = useState('');
     const [isNew, setIsNew] = useState(true);
-    const [charginStationArray, setcharginStationArray] = useState([{id:"1",name:"nume"},{id:"2",name:"nume2"}]);
+    const [charginStationArray, setcharginStationArray] = useState([]);
 
     const myemail = localStorage.getItem('email')
 
@@ -21,7 +21,7 @@ const Car = () => {
     const [disbl, setDis] = useState(false);
     const [ore,setOre] = useState([8,9,10,11,12,13])
     const [checkedItems, setCheckedItems] = useState(new Set(ore));
-    const values = ["Favourite Chargin Station", "Time Interval"];
+    const [values,setValues] = useState(["Favourite Charging Station","Time Interval"]);
 
     const [isCI, setIsCI] = useState(true);
     const [isBrand, setIsBrand] = useState(true);
@@ -69,8 +69,17 @@ const Car = () => {
 
     useEffect(() => {
         const fetchElectricVehicle = async () => {
-            //trebe facut call catre charging stations si facut dupa un fel de 
-            // setcharginStationArray(response.data)
+            try {
+                const {data} = await axios.get(`http://localhost:8000/api/electric_vehicle/${myemail}`);
+                setcharginStationArray(data)
+            } catch (error){
+                try {
+                    const {data} = await axios.get(`http://localhost:8080/ev/allcs`);
+                    setcharginStationArray(data)
+                } catch (error){
+                    
+                }
+            }
             try {
                 const {data} = await axios.get(`http://localhost:8000/api/electric_vehicle/${myemail}`);
                 setIsNew(false)
@@ -79,7 +88,21 @@ const Car = () => {
                 setModel(data.model);
                 setBatteryCapacity(data.battery_capacity);
             } catch (error){
-                setIsNew(true)
+                try {
+                    const {data} = await axios.get(`http://localhost:8080/crud/evdriver?username=${myemail}`);
+                    setIsNew(false)
+                    setIdentification(data.plateNumber);
+                    const model = data.model;
+                    const options = model.split(' ');
+                    setBrand(options[0]);
+                    setModel(options[1]);
+                    setBatteryCapacity(data.maxCapacity);
+                    if(data.constraintsPenalty[0] < data.constraintsPenalty[1]){
+                        setValues(["Time Interval","Favourite Charging Station"])
+                    }
+                } catch (error){
+                    setIsNew(true)
+                }
             }
         };
         fetchElectricVehicle();
@@ -95,6 +118,10 @@ const Car = () => {
             position: toast.POSITION.TOP_CENTER,
             autoClose: 3000
         });
+    
+    const handlePreferenceChange = (updatedValues) => {
+            setValues(updatedValues);
+          };
 
     const handleElectricVehicleOperation = async (e) => {
         e.preventDefault();
@@ -117,7 +144,43 @@ const Car = () => {
                 }, 3000);
             }
         } catch (error) {
-            showToastMessage('An error occurred');
+            try {
+                var url
+                if (isNew){
+                    //added
+                    url = `http://localhost:8080/crud/editev?username=${myemail}`;
+                }else{
+                    //edited
+                    url = `http://localhost:8080/crud/editev?username=${myemail}`;
+                }
+
+                let preference
+                if(values[0]=='Favourite Charging Station'){
+                    preference = [5,3]
+                } else {
+                    preference = [3,5]
+                }
+                const data = { plateNumber: identification, model:brand+" "+ model, maxCapacity: battery_capacity,
+                            constraintsPenalty:preference
+                 };
+    
+                if (isNew) {
+                    await axios.post(url, data);
+                    showSuccessToastMessageCar('Your car has been added successfully! Page will be reloaded');
+                    setIsNew(false);
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 3000);
+                } else {
+                    await axios.post(url, data);
+                    showSuccessToastMessageCar('Your car has been edited successfully! Page will be reloaded');
+                    setTimeout(() => {
+                        window.location.reload()
+                    }, 3000);
+                }  
+            } catch (error) {
+                showToastMessage('An error occurred');
+            }
         }
     };
 
@@ -206,7 +269,7 @@ const Car = () => {
                    </Form.Group>
                    <div>
                     <Form.Label>Set Preference Order:</Form.Label>
-                    <PreferenceOrder values={values} />
+                    <PreferenceOrder onPreferenceChange={handlePreferenceChange} values={values} />
                     </div>
                    <Form.Group style={{display:"flex",flexDirection:"column"}}>
                    <Form.Label style={{fontWeight: "bold",fontSize:15,color:"#dc3545"}}>{errorMessage}</Form.Label>
