@@ -5,6 +5,7 @@ import DQN from "./DQN";
 import { Button} from "react-bootstrap";
 import styled from 'styled-components';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import WOA from "./WOA";
 
 
 const Scheduler = () => {
@@ -40,6 +41,9 @@ const Scheduler = () => {
             </div>
         <div className="scheduler-container">
             {(isFirstClick && button1Disabled) === true && (<DQN/>)}
+        </div>
+        <div className="woa-container">
+            {( isFirstClick && button2Disabled) === true && (<WOA/>)}
         </div>
         </div>
     );
