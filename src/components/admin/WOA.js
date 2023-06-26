@@ -4,7 +4,7 @@ import axios from "axios";
 import { Button,Table} from "react-bootstrap";
 import { GoogleMap, Marker, LoadScript, InfoWindow } from "@react-google-maps/api";
 import './Scheduler.css';
-
+import {toast, ToastContainer} from "react-toastify";
 const WOA = () => {
 
     const [schedule,setSchedule] = useState([])
@@ -50,7 +50,7 @@ const WOA = () => {
 
     useEffect(() => {
 
-        axios.get("http://localhost:8080/ev/ediff?plugs=3&startTime=8&chargeType=Charge")
+        axios.get("http://localhost:8080/ev/ediff?plugs=10&startTime=8&chargeType=Charge")
         .then((response) => {
             let copieore = []
             setoldediff(response.data)
@@ -66,7 +66,7 @@ const WOA = () => {
     },[]);
 
     async function makePrediction() {
-        axios.get("http://localhost:8080/ev/sol?timeSlots=3&startTime=8&chargeType=Charge&maxCars=24&sampleSize=50")
+        axios.get("http://localhost:8080/ev/solgeneral")
         .then(res => {
         setnewediff(res.data[0]);
         setCarCharge(res.data[1]);
@@ -81,6 +81,17 @@ const WOA = () => {
        
     })
     }
+
+    async function finalizeScheduling() {
+        axios.post("http://localhost:8080/ev/finalize", schedule)
+          .then(res => {
+             console.log("aici")
+              showSuccessToastMessageCar('The notifications were sent successfully! See you again tomorrow!');
+          })
+          .catch(err => {
+            // Handle errors
+          });
+      }
 
     const containerStyle = {
         width: '600px',
@@ -109,8 +120,14 @@ const WOA = () => {
         setSelectedElement(null);
     };
 
+    const showSuccessToastMessageCar = (message) =>
+    toast.success(message, {
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: 3000
+    });
+
     return (
-        <div>
+        <div><ToastContainer />
             <div style={{maxWidth:"50%",display:'flex',justifyContent:"center", alignItems: 'center',margin:'auto'}}>
                 <Line data={LINEdata}/> 
             </div>
@@ -122,7 +139,14 @@ const WOA = () => {
             onClick={makePrediction}>
             Make scheduling
             </Button>   
-            </div>         
+            </div>   
+            {schedule.length > 0 &&
+            <div style={{display:'flex',justifyContent:"center", alignItems: 'center',margin:'auto',marginTop:"10px",marginBottom:"10px"}}>
+             <Button variant='success' 
+            onClick={finalizeScheduling}>
+            Finalize & Send notifications
+            </Button>   
+            </div>      }   
             <div>
             <div style={{display:'flex',justifyContent:"center", alignItems: 'center',margin:'auto',marginTop:"10px",marginBottom:"10px"}}>
             <LoadScript googleMapsApiKey="AIzaSyALD8glYng1LfMqO-tQLhUpVcCQOc6sSfU">

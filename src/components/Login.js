@@ -29,8 +29,6 @@ const Login = () => {
                 "http://localhost:8000/api/login",
                 { uname: uname.value, pass: pass.value }
             );
-            //insert my api here
-            console.log(response.data.email)
             localStorage.setItem("token", response.data.token);
             localStorage.setItem("email", response.data.email);
             localStorage.setItem("role", response.data.role);
@@ -41,10 +39,17 @@ const Login = () => {
                         "http://localhost:8080/crud/login",
                         { username: uname.value, password: pass.value }
                     );
+                    console.log(!response.data)
+                    if(response.data){
+                        console.log("aici")
                     localStorage.setItem("email", response.data.username);
                     localStorage.setItem("id", response.data.id);
                     localStorage.setItem("role", "Client");
                     navigate('/home');
+                    } else{
+                        showToastMessage();
+                    }
+                    
                     } catch (error) {
                         showToastMessage();
                     }

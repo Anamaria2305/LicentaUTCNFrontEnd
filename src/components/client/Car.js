@@ -19,8 +19,8 @@ const Car = () => {
 
     const [errorMessage, setMessage] = useState("");
     const [disbl, setDis] = useState(false);
-    const [ore,setOre] = useState([8,9,10,11,12,13])
-    const [checkedItems, setCheckedItems] = useState(new Set(ore));
+    const [ore,setOre] = useState([8,9,10,11,12,13,14,15,16,17])
+    const [checkedItems, setCheckedItems] = useState([]);
     const [values,setValues] = useState(["Favourite Charging Station","Time Interval"]);
 
     const [isCI, setIsCI] = useState(true);
@@ -69,13 +69,14 @@ const Car = () => {
 
     useEffect(() => {
         const fetchElectricVehicle = async () => {
+            let csData
             try {
                 const {data} = await axios.get(`http://localhost:8000/api/electric_vehicle/${myemail}`);
                 setcharginStationArray(data)
             } catch (error){
                 try {
-                    const {data} = await axios.get(`http://localhost:8080/ev/allcs`);
-                    setcharginStationArray(data)
+                    csData = await axios.get(`http://localhost:8080/ev/allcs`);
+                    setcharginStationArray(csData.data)
                 } catch (error){
                     
                 }
@@ -100,6 +101,10 @@ const Car = () => {
                     if(data.constraintsPenalty[0] < data.constraintsPenalty[1]){
                         setValues(["Time Interval","Favourite Charging Station"])
                     }
+                    let incrementedTimeSlots = data.favouriteTimeSlots.map((timeSlot) => timeSlot + 7);
+                    setCheckedItems(incrementedTimeSlots)
+                    const initialSelectedStation = csData.data.filter(station => station.id == data.favouriteChargingStation.id)
+                    setSelectedStation(initialSelectedStation[0].id);
                 } catch (error){
                     setIsNew(true)
                 }
@@ -148,7 +153,7 @@ const Car = () => {
                 var url
                 if (isNew){
                     //added
-                    url = `http://localhost:8080/crud/editev?username=${myemail}`;
+                    url = `http://localhost:8080/crud/saveev?username=${myemail}`;
                 }else{
                     //edited
                     url = `http://localhost:8080/crud/editev?username=${myemail}`;
@@ -160,12 +165,26 @@ const Car = () => {
                 } else {
                     preference = [3,5]
                 }
+                const favTimSlots =  Array.from(checkedItems).map((timeSlot) => timeSlot - 7);
+                const favCS = charginStationArray.filter(station => station.id == selectedStation)  
                 const data = { plateNumber: identification, model:brand+" "+ model, maxCapacity: battery_capacity,
-                            constraintsPenalty:preference
+                            constraintsPenalty:preference,
+                            favouriteTimeSlots :favTimSlots,
+                            favouriteChargingStation: favCS[0]
                  };
-    
+                 const min = 15;
+                 const max = 45;
+                 const dataForSave = { plateNumber: identification, model:brand+" "+ model, 
+                 maxCapacity: battery_capacity,
+                 constraintsPenalty:preference,
+                 favouriteTimeSlots :favTimSlots,
+                 favouriteChargingStation: favCS[0],
+                 minSOC:20,
+                 soccurrent: Math.floor(Math.random() * (max - min + 1)) + min,
+                 chrDisPerHour: 18
+                    };
                 if (isNew) {
-                    await axios.post(url, data);
+                    await axios.post(url, dataForSave);
                     showSuccessToastMessageCar('Your car has been added successfully! Page will be reloaded');
                     setIsNew(false);
                     setTimeout(() => {
@@ -186,17 +205,25 @@ const Car = () => {
 
     const handleCheckboxChange = (event) => {
         const value = parseInt(event.target.value);
-        if (checkedItems.has(value)) {
-          checkedItems.delete(value);
+        const newCheckedItems = new Set(checkedItems); // Create a new Set based on existing checkedItems
+      
+        if (newCheckedItems.has(value)) {
+          newCheckedItems.delete(value);
         } else {
-          checkedItems.add(value);
+          newCheckedItems.add(value);
         }
-    
-        if (checkedItems.size === 0) {
-          checkedItems.add(value);
+      
+        if (newCheckedItems.size === 0) {
+          newCheckedItems.add(value);
         }
-    
-        setCheckedItems(new Set(checkedItems));
+      
+        setCheckedItems(newCheckedItems);
+      };
+
+
+      const [selectedStation, setSelectedStation] = useState('');
+      const handleSelectChange = (event) => {
+        setSelectedStation(event.target.value);
       };
 
     return (
@@ -245,7 +272,10 @@ const Car = () => {
                    </Form.Group>
                    <Form.Group>
                     <Form.Label>Favourite Charging Station:</Form.Label>
-                    <Form.Select aria-label="Default select example" name= "fcs" style={{ width: "100%" }}>
+                    <Form.Select aria-label="Default select example" name= "fcs" style={{ width: "100%" }}
+                     onChange={handleSelectChange}
+                     value={selectedStation}
+                   >
                     { charginStationArray.map((charginStation) => (
                                    <option value={[charginStation.id]}>{charginStation.name}</option>
                                ))
@@ -254,7 +284,9 @@ const Car = () => {
                 </Form.Group>
                 <Form.Group>
                        <Form.Label>Your availability:</Form.Label>
-                       <div style={{display:"flex",justifyContent:"space-between",width: "100%"}}>
+                       <div style={{display:"flex",justifyContent:"space-between",width: "100%"}}
+                       value={selectedStation}
+                       onChange={handleSelectChange}>
                        {ore.map((element) => (
                         <Form.Check
                         key={element}
@@ -262,7 +294,7 @@ const Car = () => {
                         id={`checkbox-${element}`}
                         label={element}
                         value={element}
-                        checked={checkedItems.has(element)}
+                        checked={Array.from(checkedItems).includes(element)}
                         onChange={handleCheckboxChange}
                         />
                         ))}</div>

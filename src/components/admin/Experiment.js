@@ -19,7 +19,7 @@ const Experiment = () => {
     const [startHour, setStartHour] = useState(0);
     const [hours, setHours] = useState(scheduleHoursArray[0]);
     const [cs, setCS] = useState(charginStationArray[0]);
-    const [disbl, setDis] = useState(false);
+    const [disbl, setDis] = useState(true);
     const [selectedOption, setSelectedOption] = useState('Charge');
     const [selectedOptionAlg, setSelectedOptionAlg] = useState('DQN');
     const [messagePlugs, setMsg]  = useState('Plugs are equal to the charging stations');
@@ -53,6 +53,10 @@ const Experiment = () => {
     const [timeElapsed,setTimeElapsed] = useState()
     const [constraintsPenalties,setConstraintsPenalties] = useState([])
     const [iterations,setIterations] = useState([])
+    const [grdata,setGenerateRandomData] = useState(true)
+    const [fitnessWOAITH,setFitnessWOAITH] = useState([])
+    const [isDisabled,setScheduleDisabled] = useState(false)
+    const [selectedFile, setSelectedFile] = useState(null);
     const locations = [
         { latitude:46.783268112023215,longitude: 23.62194039431511},
         { latitude:46.74841349371496, longitude:23.596804554098277},
@@ -100,14 +104,29 @@ const Experiment = () => {
           ],
       };
 
+      const fitnessDataITH = {
+        labels:iterations,
+        datasets: [
+              {
+                  label: "Fitness Evolution",
+                  data: fitnessWOAITH,
+                  backgroundColor: ["orange"],
+                  borderColor: ["orange"],
+                  borderWidth: 2.5,
+                  fill: false,
+                  tension: 0.4,
+              }
+          ],
+      };
+
       const euclideanData = {
         labels:iterations,
         datasets: [
               {
                   label: "Euclidean Distance Diversity Each Iterations",
                   data: euclidean,
-                  backgroundColor: ["green"],
-                  borderColor: ["green"],
+                  backgroundColor: ["#A020F0"],
+                  borderColor: ["#A020F0"],
                   borderWidth: 2.5,
                   fill: false,
                   tension: 0.4,
@@ -121,11 +140,20 @@ const Experiment = () => {
 
     const handleRadioChangeAlg = (event) => {
         setSelectedOptionAlg(event.target.value);
+        setDis(true)
         if(event.target.value == 'WOA'){
             setMsg("Plugs are two times the charging stations")
         } else{
             setMsg("Plugs are equal to the charging stations")
         }
+    };
+
+    const handleRadioChangeData = (event) => {
+        setDis(true)
+        if(event.target.value === 'grd')
+        setGenerateRandomData(true);
+        else
+        setGenerateRandomData(false)
     };
 
     const PIEdataDQN = {
@@ -198,6 +226,8 @@ const Experiment = () => {
             }
 
         } else if(selectedOptionAlg==="WOA"){
+            if(grdata){
+
             const params = new URLSearchParams({
                 timeSlots: parseInt(hours),
                 startTime: parseInt(startHour),
@@ -208,10 +238,11 @@ const Experiment = () => {
               const params2 = new URLSearchParams({
                 plugs: parseInt(hours),
                 startTime:parseInt(startHour),
-                chargeType: selectedOption
+                chargeType: selectedOption,
+                nbev:parseInt(cars)
               }).toString();
               try {
-                var response = await axios.get("http://localhost:8080/ev/ediff?"+params2)
+                var response = await axios.get("http://localhost:8080/ev/ediffexp?"+params2)
                 var res= await axios.get("http://localhost:8080/ev/exp?"+params)
                 let copieore = []
                 setoldediff(response.data)
@@ -235,12 +266,66 @@ const Experiment = () => {
                 setTimeElapsed(res.data[9][0])
                 setConstraintsPenalties(res.data[10][0])
                 setEuclidean(res.data[11][0])
+                setFitnessWOAITH(res.data[12][0])
                 onOpenWOAModal()
               } catch (error) {
 
                 showToastMessage("Something went wrong with the experiment.")
 
               }
+            } else {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                const url = new URL('http://localhost:8080/ev/upload');
+                url.searchParams.append('startTime', parseInt(startHour));
+                url.searchParams.append('chargeType', selectedOption);
+                try{
+                    const params2 = new URLSearchParams({
+                        plugs: parseInt(hours),
+                        startTime:parseInt(startHour),
+                        chargeType: selectedOption
+                      }).toString();
+                    var response = await axios.post("http://localhost:8080/ev/ediffExpUpl?"+params2,formData, {
+                        headers: {
+                          'Content-Type': 'multipart/form-data'
+                        }})
+                    var res = await axios.post(url.toString(), formData, {
+                        headers: {
+                          'Content-Type': 'multipart/form-data'
+                        }})
+                        let copieore = []
+                        setoldediff(response.data)
+                        for(let i=8;i<response.data.length+8;i++){
+                        copieore.push(i)
+                        }
+                        setore(copieore)
+                        let copieiter = []
+                        for(let i=0;i<res.data[7][0].length;i++){
+                            copieiter.push(i)
+                        }
+                        setIterations(copieiter)
+                        setCarCharge(res.data[1]);
+                        setSchedule(res.data[2][0])
+                        setCarChargeHours(res.data[3][0])
+                        setCsresponse(res.data[4][0])
+                        setCorr(res.data[5][0])
+                        setmsjStatii(res.data[6][0])
+                        setFitnessWOA(res.data[7][0])
+                        setConvRate(res.data[8][0])
+                        setTimeElapsed(res.data[9][0])
+                        setConstraintsPenalties(res.data[10][0])
+                        setEuclidean(res.data[11][0])
+                        setFitnessWOAITH(res.data[12][0])
+                        onOpenWOAModal()
+                    
+                }
+                catch(error){
+                    showToastMessage("Something went wrong with scheduling.")
+                }
+                  
+            }
+
+
         } else {
             showToastMessage("Something went wrong with the selection.")
         }
@@ -305,7 +390,7 @@ const Experiment = () => {
       const renderHoursOptions = () => {
         const options = [];
     
-        for (let hour = 0; hour < (24-(hours-1)); hour++) {
+        for (let hour = 5; hour < (24-(hours-1)); hour++) {
           const formattedHour = hour.toString().padStart(2, '0');
           options.push(
             <option key={formattedHour} value={hour}>
@@ -320,6 +405,61 @@ const Experiment = () => {
     function trainModel() {
         navigate('/train');
     }
+
+    const handleFileUpload = (event) => {
+    const files = event.target.files;
+    if (files.length < 1) {
+      setSelectedFile(null);
+      setDis(true);
+    } else {
+      const file = files[0];
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const contents = e.target.result;
+      };
+
+      reader.readAsText(file);
+      setSelectedFile(file);
+      setDis(false);
+    }
+  };
+
+    function saveCSV(event) {
+        const params = new URLSearchParams({
+            csnum: parseInt(cs),
+            window: parseInt(hours)
+          }).toString();
+        
+          const formattedDate = new Date().toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          });
+        
+          const fileName = `ExperimentData${formattedDate}.csv`;
+          axios({
+            url: `http://localhost:8080/ev/download?${params}`,
+            method: 'POST',
+            responseType: 'blob',
+            data: schedule
+          })
+            .then((response) => {
+              const url = window.URL.createObjectURL(new Blob([response.data]));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', fileName);
+              document.body.appendChild(link);
+              link.click();
+            })
+            .catch((error) => {
+              showToastMessage("Something went wrong while saving!")
+            });
+    }
+
     const role = localStorage.getItem("role");
     if(role === "Admin")
     return (
@@ -338,7 +478,18 @@ const Experiment = () => {
                    <div>
                    <Form.Check type="radio" inline value="DQN" label="DQN" name="radioGroup1" defaultChecked onChange={handleRadioChangeAlg}/>
                    <Form.Check type="radio" inline value="WOA" label="WOA" name="radioGroup1" onChange={handleRadioChangeAlg}/>
-                   </div></Form.Group>
+                   </div>
+                   </Form.Group>
+
+                   <Form.Group style={{marginTop:"5px"}}>
+                   <Form.Label> Data generation: </Form.Label>
+                   <div>
+                   <Form.Check type="radio" inline value="grd" label="Generate Random Data" name="radioGroup2" defaultChecked onChange={handleRadioChangeData}/>
+                   <Form.Check type="radio" inline value="ucsv" label="Upload your own csv file" name="radioGroup2" onChange={handleRadioChangeData}/>
+                   </div>
+                   </Form.Group>
+                    { grdata &&
+                    <div>
                    <Form.Group>
                        <Form.Label> Number of Charging Station ({messagePlugs}) </Form.Label>
                        <Form.Select aria-label="Default select example" name= "ncs" style={{ width: "100%" }}
@@ -350,6 +501,7 @@ const Experiment = () => {
                         }
                     </Form.Select>
                     </Form.Group>
+
                     <Form.Group>
                        <Form.Label> Scheduling window </Form.Label>
                        <Form.Select aria-label="Default select example" name= "sw" style={{ width: "100%" }}
@@ -359,6 +511,7 @@ const Experiment = () => {
                                ))} 
                     </Form.Select>
                     </Form.Group>
+
                    <Form.Group>
                        <Form.Label>Number of Electric Vehicles:</Form.Label>
                        <Form.Control
@@ -368,6 +521,16 @@ const Experiment = () => {
                            onChange={(e) => onChangeCars(e)}
                            placeholder="Electric Vehicles" />
                    </Form.Group>
+                   </div>
+                    }
+                    { !grdata &&
+                    <div>                  
+                    <Form.Group controlId="formFile" className="mb-3">
+                    <Form.Label>Insert Your CSV file here</Form.Label>
+                    <Form.Control type="file" accept="text/csv" onChange={handleFileUpload}/>
+                  </Form.Group>
+                  </div>
+                    }
                    <Form.Group style={{marginTop:"5px"}}>
                    <Form.Label> Choose energy curve: </Form.Label>
                    <div>
@@ -381,7 +544,7 @@ const Experiment = () => {
                    </Form.Select>
                    </Form.Group>
                    <Form.Group style={{display:"flex",flexDirection:"column"}}>
-                   {disbl && <Form.Label style={{fontWeight: "bold",fontSize:15,color:"#dc3545"}}>Too Many Electrical Vehicles</Form.Label>}
+                   {disbl && <Form.Label style={{fontWeight: "bold",fontSize:15,color:"#dc3545"}}>Complete all the fields</Form.Label>}
                    </Form.Group>
                    <Button className="but" variant="primary" disabled={disbl} type="submit" style={{ margin: "10px" }}>
                         See scheduling
@@ -420,14 +583,23 @@ const Experiment = () => {
         width: '90%', // Adjust the width as needed
         },
         }}>
+         {grdata &&
+                   <Button className="but" variant="dark" type="submit" style={{ margin: "10px" }} onClick={saveCSV}>
+                       Save Generated Data As CSV File
+                   </Button>
+                   }
         <div><h3>Energy Profiles</h3></div>
         <div><Line data={LINEdata}/> </div>
         {correlation && <div style={{display:'flex',justifyContent:"center", alignItems: 'center',margin:'auto',marginTop:"10px",marginBottom:"10px"}}>
             <h5>Correlation coefficient between the curves is: <b>{correlation}</b></h5>
             </div>}
-        <div><h3>Fitness Evolution</h3></div>
+        <div><h3>Fitness Evolution Globally Each Iterations</h3></div>
         <div>
         <Line data={fitnessData}/>
+        </div>
+        <div><h3>Fitness Evolution Each Iteration From Generation</h3></div>
+        <div>
+        <Line data={fitnessDataITH}/>
         </div>
         <div><h3>Euclidean Distance Diversity Each Iterations</h3></div>
         <div>

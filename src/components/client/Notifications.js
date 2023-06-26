@@ -3,32 +3,40 @@ import React, { useState, useEffect } from 'react';
 import { Card, Classes } from "@blueprintjs/core";
 import {toast, ToastContainer} from "react-toastify";
 import "../../css/Login.css";
+import axios from "axios";
 import { GoogleMap, Marker, LoadScript, InfoWindow } from "@react-google-maps/api";
 const Notifications = () => {
 
-    const [station, setStation] = useState('statie');
-    const [time, setTime] = useState('ora t');
-    const [data, setData] = useState('data t');
-    const [location, setLocation] = useState([{latitude:46.783268112023215,longitude: 23.62194039431511}]);
+    const [station, setStation] = useState();
+    const [time, setTime] = useState();
+    const [data, setData] = useState();
+    const [valueChr, setValueChr] = useState();
+    const [isNotification,setIsNotification] = useState(false)
+    const [location, setLocation] = useState([]);
     const locations = [
         { latitude:46.783268112023215,longitude: 23.62194039431511},
         { latitude:46.74841349371496, longitude:23.596804554098277},
         { latitude:46.776576313581614, longitude:23.60415708143363 },
         { latitude: 46.75977259501111, longitude:23.563878677375598 },
       ];
-
+    const myemail = localStorage.getItem('email')
     useEffect(() => {
-        try {
-            //call horia
-        } catch {
-            try{ 
-                //call ana
-            } catch {
+        axios.get(`http://localhost:8080/ev/notification?username=${myemail}`)
+            .then((response) => {
+                if(response.data.length>0){
+                setIsNotification(true)
+                setValueChr(response.data[0])
+                setData(response.data[1])
+                setStation(response.data[3].name)
+                setTime(response.data[2])   
+                setLocation([locations[response.data[3].id-1]])
+                }            
+            })
+            .catch((error) => {
                 showToastMessage('An error occurred');
-            }
-        }
+            });
     }, []);
-
+  
     const showToastMessage = (message) =>
         toast.error(message, {
             position: toast.POSITION.TOP_CENTER
@@ -51,7 +59,7 @@ const Notifications = () => {
     };
 
     const containerStyle = {
-        width: '800px',
+        width: '820px',
         height: '350px'
     };
     
@@ -64,22 +72,30 @@ const Notifications = () => {
         <div>
             <ClientNav/><div>
             <div className="custom-card">
-            <Card className={Classes.ELEVATION_3}>
+            {isNotification && <Card className={Classes.ELEVATION_3}>
                <fieldset className="fieldset-bordered">
-                   <div><pre>Your have been scheduled to charging station {station}</pre>
-                   <pre> tommorrow ({data}) at time {time}. </pre>
+                   <div><pre>Your have been scheduled to charging station located on </pre>
+                   <pre>{station}</pre>
+                   <pre> tommorrow ({data}) at time {time}:00 with value {valueChr} KWh. </pre>
                    <pre>Check the map down below to find the location.</pre>
                    <pre>Have a nice day!</pre>
                    </div>
                </fieldset>
-            </Card>
+            </Card>}
+            {!isNotification && <Card className={Classes.ELEVATION_3}>
+               <fieldset className="fieldset-bordered">
+                   <div><pre>You have no notifications yet.</pre>
+                   <pre>Have a nice day!</pre>
+                   </div>
+               </fieldset>
+            </Card>}
             </div></div>
-            <div style={{display:'flex',justifyContent:"center", alignItems: 'center',margin:'auto',marginTop:"260px",marginBottom:"10px"}}>
+            <div style={{display:'flex',justifyContent:"center", alignItems: 'center',margin:'auto',marginTop:"280px",marginBottom:"10px"}}>
             <LoadScript googleMapsApiKey="AIzaSyALD8glYng1LfMqO-tQLhUpVcCQOc6sSfU">
                 <GoogleMap
                     mapContainerStyle={containerStyle}
                     center={center}
-                    zoom={13.5}
+                    zoom={12.5}
                 >
                     {location.map((location, index) => (
                         <Marker
